@@ -27,9 +27,18 @@ END_LOG_CMD = """请执行以下操作来结束工作日志记录：
      "tasks": [{{"text": "任务描述", "completed": true/false}}],
      "decisions": ["关键决策1", "关键决策2"],
      "artifacts": ["创建或修改的文件路径"],
-     "handoff_to": null
+     "related_files": ["相关文件路径"],
+     "handoff_to": null,
+     "conversation": "完整对话记录（按时间线整理每个 user/assistant 交互的关键操作和技术细节）"
    }}
    ```
+
+   重要：
+   - conversation 字段应包含本次会话的完整对话记录，按时间线整理
+   - 每个 user 消息写摘要，每个 assistant 响应写关键操作（读了什么、改了什么、运行了什么）
+   - 保留关键的技术细节和决策理由
+   - 日志采用 %% 双层架构：摘要层（summary/tasks/decisions/artifacts）自动加载到下次会话；对话层（conversation）仅在需要回溯时查看
+
 3. 运行命令（将 JSON 作为 --data 参数传入）：
    `{python_cmd} "{scripts_root}/src/commands/end_log.py" --tool qoder --session-id <会话ID> --data '<JSON数据>'`
 
@@ -45,6 +54,12 @@ AGENT_CONTENT = """# LogRelay 工作日志接力 Agent
 - 如果存在，读取未完成任务并报告给用户
 - 建议使用 `/start-log` 开始记录
 - 建议在会话结束时使用 `/end-log` 结束记录
+
+## 双层日志架构
+- 日志文件用 `%%` 分隔为两层
+- 摘要层（%% 之前）：自动加载到下次会话，包含摘要/任务/决策/产出物
+- 对话层（%% 之后）：完整对话记录，仅按需查看
+- 使用 `/end-log` 时，conversation 字段内容会写入对话层
 
 ## 注意事项
 - 所有日志文件为 Markdown 格式，存储在 `项目/logs/工具名/` 下

@@ -27,6 +27,45 @@ from core.formatter import create_log_content
 from core.status_manager import read_status, get_pending_tasks, get_recent_sessions
 
 
+def _cleanup_stale_active_logs(logs_dir: Path) -> int:
+    """清理同工具目录下残留的 active 状态日志。
+
+    将只有 frontmatter 无实质内容的旧 active 日志标记为 abandoned。
+    已有摘要等实质内容的保留为 paused 状态（可能用户忘了保存）。
+
+    返回清理的文件数。
+    """
+    if not logs_dir.exists():
+        return 0
+
+    cleaned = 0
+    for log_file in logs_dir.glob("*.md"):
+        if log_file.name == "STATUS.md":
+            continue
+        content = log_file.read_text(encoding="utf-8")
+        if "status: active" not in content:
+            continue
+
+        # 判断是否有实质内容（frontmatter 结束后的正文）
+        fm_end = content.find("---", 4)
+        if fm_end < 0:
+            continue
+        body = content[fm_end + 3:].strip()
+
+        if not body:
+            # 空壳文件：只有 frontmatter，标记为 abandoned
+            new_content = content.replace("status: active", "status: abandoned")
+            log_file.write_text(new_content, encoding="utf-8")
+            cleaned += 1
+        elif "## 摘要" not in body:
+            # 有 PostToolUse 追加的操作记录但无正式摘要，标记为 paused
+            new_content = content.replace("status: active", "status: paused")
+            log_file.write_text(new_content, encoding="utf-8")
+            cleaned += 1
+
+    return cleaned
+
+
 def _get_last_log_summary(project_path: Path, tool: str) -> str | None:
     """读取最近一条已完成日志的摘要层（%% 之前的内容）。
 
@@ -77,6 +116,7 @@ def main():
 
     project_path, project_name = find_project_root(cwd, vault_root)
     logs_dir = ensure_logs_dir(project_path, tool)
+    _cleanup_stale_active_logs(logs_dir)
     session_id = get_timestamp().replace("T", "_").replace(":", "")
     log_filename = generate_filename()
     log_path = logs_dir / log_filename

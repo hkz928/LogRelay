@@ -82,6 +82,10 @@ Each session log is split into two layers by `%%`:
 └──────────────────────────────┘
 ```
 
+**Incremental saving**: Say "save log" multiple times — summary layer updates to latest state each time, conversation layer only appends new dialogue, never overwrites.
+
+**Stale log cleanup**: SessionStart auto-cleans leftover `active` logs from previous sessions — empty shells get marked `abandoned`, partial logs get marked `paused`.
+
 ### Log Format
 
 ```markdown
@@ -269,6 +273,10 @@ python3 install.py --skip-plugin
 │ - 技术细节完整保留             │
 └──────────────────────────────┘
 ```
+
+**增量保存**：可多次说 "保存日志"——摘要层每次更新为最新状态，对话层只追加新对话记录，不覆盖已有内容。
+
+**空日志自动清理**：SessionStart 每次启动时自动清理上次遗留的空壳日志——空文件标记为 `abandoned`，有操作记录但未保存的标记为 `paused`。
 
 ### 日志格式
 

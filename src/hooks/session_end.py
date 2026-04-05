@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--session-id", required=True, help="会话 ID")
     parser.add_argument("--summary", default=None, help="摘要文本")
     parser.add_argument("--cwd", default=None, help="当前工作目录")
-    parser.add_argument("--data", default=None, help="JSON 格式完整会话数据")
+    parser.add_argument("--data", default=None, help="JSON 格式完整会话数据（支持 conversation 字段写入对话层）")
     args = parser.parse_args()
 
     tool = args.tool
@@ -128,7 +128,11 @@ def _find_active_log(logs_dir: Path, session_id: str) -> Path | None:
 
 
 def _build_sections(summary: str, data: dict) -> str:
-    """构建摘要相关的 section 内容。"""
+    """构建摘要相关的 section 内容（%% 双层格式）。
+
+    摘要层包含：摘要 + 任务清单 + 关键决策 + 产出物 + 上下文传递。
+    对话层在 %% 之后，通过 conversation 参数传入。
+    """
     parts = [f"\n## 摘要\n{summary}\n"]
 
     tasks = data.get("tasks", [])
@@ -151,6 +155,23 @@ def _build_sections(summary: str, data: dict) -> str:
         parts.append("## 产出物")
         for a in artifacts:
             parts.append(f"- `{a}`")
+        parts.append("")
+
+    # 上下文传递
+    parts.append("## 上下文传递")
+    parts.append("- 依赖前置会话: 无")
+    related = data.get("related_files", [])
+    if related:
+        parts.append(f"- 相关文件: {', '.join(related)}")
+    parts.append("")
+
+    # %% 双层分隔：摘要层结束，对话层开始
+    parts.append("%%\n")
+
+    conversation = data.get("conversation", "")
+    if conversation:
+        parts.append("## 完整对话记录\n")
+        parts.append(conversation)
         parts.append("")
 
     return "\n".join(parts)
