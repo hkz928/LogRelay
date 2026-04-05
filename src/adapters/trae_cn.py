@@ -10,7 +10,12 @@ from pathlib import Path
 
 from ..core.config import get_python_cmd, get_scripts_root
 
-RULE_CONTENT = """# LogRelay 工作日志接力
+RULE_CONTENT = """---
+name: logrelay
+description: 跨工具工作日志接力系统。会话开始时自动加载未完成任务，会话结束时用户说"保存日志"或"结束日志"触发日志保存，生成双层日志（摘要层+对话层）并更新 STATUS.md。
+---
+
+# LogRelay 工作日志接力
 
 ## 规则
 
@@ -93,15 +98,15 @@ def install(vault_root: Path) -> None:
     hooks_file.write_text(json.dumps(hooks_config, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"  ✓ Trae CN hooks 已写入 {hooks_file}")
 
-    # 写入规则文件
+    # 写入 SKILL.md（Trae skill 入口文件，AI 自动加载）
     scripts_root = get_scripts_root()
     python_cmd = get_python_cmd()
-    rule_file = skills_dir / "logrelay-rule.md"
-    rule_file.write_text(
+    skill_file = skills_dir / "SKILL.md"
+    skill_file.write_text(
         RULE_CONTENT.format(python_cmd=python_cmd, scripts_root=scripts_root),
         encoding="utf-8",
     )
-    print(f"  ✓ Trae CN rules 已写入 {rule_file}")
+    print(f"  ✓ Trae CN SKILL.md 已写入 {skill_file}")
 
 
 def uninstall(vault_root: Path) -> None:
