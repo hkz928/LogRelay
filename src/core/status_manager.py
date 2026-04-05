@@ -155,10 +155,28 @@ def get_pending_tasks(status: dict) -> list:
 
 
 def get_recent_sessions(status: dict, n: int = 5) -> list:
-    """获取最近 N 条会话记录。"""
+    """获取最近 N 条会话记录。
+
+    兼容两种格式：
+    - dict 格式：{"日期": "...", "工具": "...", ...}（由 update_status_on_session_end 生成）
+    - 字符串格式：markdown 表格行（手动编写的 STATUS.md）
+    """
     if status is None:
         return []
-    return status.get("sections", {}).get("会话历史", [])[:n]
+    raw = status.get("sections", {}).get("会话历史", [])
+    # 过滤掉 markdown 表格头和分隔行，保留 dict 和数据行
+    sessions = []
+    for item in raw:
+        if isinstance(item, dict):
+            sessions.append(item)
+        elif isinstance(item, str):
+            line = item.strip()
+            if not line.startswith("|"):
+                continue
+            if "---" in line or "日期" in line:
+                continue
+            sessions.append(item)
+    return sessions[:n]
 
 
 def _parse_sections(content: str) -> dict:
@@ -233,6 +251,22 @@ def _render_status(data: dict) -> str:
 
     for section_name, content in sections.items():
         parts.append(f"\n## {section_name}\n")
+
+        # 会话历史用 markdown 表格渲染
+        if section_name == "会话历史" and isinstance(content, list):
+            table_items = [item for item in content if isinstance(item, dict)]
+            if table_items:
+                parts.append("| 日期 | 工具 | 会话 | 主题 |")
+                parts.append("|------|------|------|------|")
+                for item in table_items:
+                    parts.append(f"| {item.get('日期', '')} | {item.get('工具', '')} | {item.get('会话', '')} | {item.get('主题', '')} |")
+            # 也有字符串行的旧格式，原样输出
+            for item in content:
+                if isinstance(item, str) and item.strip().startswith("|"):
+                    parts.append(item.strip())
+            parts.append("")
+            continue
+
         if isinstance(content, list):
             for item in content:
                 if isinstance(item, dict):

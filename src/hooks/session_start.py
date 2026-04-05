@@ -114,7 +114,11 @@ def main():
         if pending:
             if recent:
                 last = recent[0]
-                print(f"[LogRelay] 检测到上次会话（{last.get('工具', '?')}, {last.get('日期', '?')}）有 {len(pending)} 个未完成任务：")
+                if isinstance(last, dict):
+                    tool_info = f"{last.get('工具', '?')}, {last.get('日期', '?')}"
+                else:
+                    tool_info = str(last)[:60]
+                print(f"[LogRelay] 检测到上次会话（{tool_info}）有 {len(pending)} 个未完成任务：")
             else:
                 print(f"[LogRelay] 有 {len(pending)} 个未完成任务：")
             for task in pending[:10]:
