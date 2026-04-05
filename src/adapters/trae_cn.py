@@ -10,6 +10,47 @@ from pathlib import Path
 
 from ..core.config import get_python_cmd, get_scripts_root
 
+RULE_CONTENT = """# LogRelay 工作日志接力
+
+## 规则
+
+每次会话开始时：
+1. 检查当前项目目录下是否存在 `logs/STATUS.md`
+2. 如果存在，读取其中的「未完成任务」列表
+3. 向用户报告有未完成的工作可以继续
+
+## 会话结束日志记录
+
+当用户说以下任何一种时，执行会话日志保存：
+- "结束日志" / "保存日志" / "end log"
+- "记录会话" / "记录一下"
+
+### 执行步骤
+
+1. 回顾本次会话的全部工作内容
+2. 从 SessionStart hook 输出中找到 `SESSION_ID` 和 `LOG_PATH`
+3. 生成结构化摘要（JSON 格式）：
+   ```json
+   {{
+     "summary": "一段话总结本次会话（不超过200字）",
+     "tasks": [{{"text": "任务描述", "completed": true/false}}],
+     "decisions": ["关键决策1"],
+     "artifacts": ["创建或修改的文件路径"],
+     "related_files": ["相关文件路径"],
+     "handoff_to": null,
+     "conversation": "完整对话记录（按时间线整理每个交互的关键操作和技术细节）"
+   }}
+   ```
+4. 运行命令：
+   `{python_cmd} "{scripts_root}/src/hooks/session_end.py" --tool trae-cn --session-id <SESSION_ID> --data '<JSON数据>'`
+
+### 双层日志架构
+- 日志文件用 `%%` 分隔为两层
+- 摘要层（%% 之前）：下次会话自动加载，包含摘要/任务/决策/产出物
+- 对话层（%% 之后）：完整对话记录，仅按需查看
+- `%%` 必须独占一行，前后各有一个空行
+"""
+
 
 def generate_hooks_config() -> dict:
     """生成 Trae CN hooks 配置。"""
@@ -43,7 +84,7 @@ def generate_hooks_config() -> dict:
 
 
 def install(vault_root: Path) -> None:
-    """安装 Trae CN hooks 配置。"""
+    """安装 Trae CN hooks 配置和日志规则。"""
     skills_dir = vault_root / ".trae-cn" / "skills" / "logrelay"
     skills_dir.mkdir(parents=True, exist_ok=True)
 
@@ -51,6 +92,16 @@ def install(vault_root: Path) -> None:
     hooks_file = skills_dir / "hooks.json"
     hooks_file.write_text(json.dumps(hooks_config, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"  ✓ Trae CN hooks 已写入 {hooks_file}")
+
+    # 写入规则文件
+    scripts_root = get_scripts_root()
+    python_cmd = get_python_cmd()
+    rule_file = skills_dir / "logrelay-rule.md"
+    rule_file.write_text(
+        RULE_CONTENT.format(python_cmd=python_cmd, scripts_root=scripts_root),
+        encoding="utf-8",
+    )
+    print(f"  ✓ Trae CN rules 已写入 {rule_file}")
 
 
 def uninstall(vault_root: Path) -> None:

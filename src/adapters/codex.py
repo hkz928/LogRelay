@@ -10,6 +10,39 @@ from pathlib import Path
 
 from ..core.config import get_python_cmd, get_scripts_root
 
+RULE_CONTENT = """# LogRelay 工作日志接力
+
+## 会话结束日志记录
+
+当用户说以下任何一种时，执行会话日志保存：
+- "结束日志" / "保存日志" / "end log"
+- "记录会话" / "记录一下"
+
+### 执行步骤
+
+1. 回顾本次会话的全部工作内容
+2. 从 SessionStart hook 输出中找到 `SESSION_ID` 和 `LOG_PATH`
+3. 生成结构化摘要（JSON 格式）：
+   ```json
+   {{
+     "summary": "一段话总结本次会话（不超过200字）",
+     "tasks": [{{"text": "任务描述", "completed": true/false}}],
+     "decisions": ["关键决策1"],
+     "artifacts": ["创建或修改的文件路径"],
+     "related_files": ["相关文件路径"],
+     "handoff_to": null,
+     "conversation": "完整对话记录（按时间线整理每个交互的关键操作和技术细节）"
+   }}
+   ```
+4. 运行命令：
+   `{python_cmd} "{scripts_root}/src/hooks/session_end.py" --tool codex --session-id <SESSION_ID> --data '<JSON数据>'`
+
+### 双层日志架构
+- 日志文件用 `%%` 分隔为两层
+- 摘要层（%% 之前）：下次会话自动加载
+- 对话层（%% 之后）：完整对话记录，仅按需查看
+"""
+
 
 def generate_hooks_config() -> dict:
     """生成 Codex hooks.json 配置。"""
@@ -82,6 +115,16 @@ def install(vault_root: Path) -> None:
 
     hooks_file.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"  ✓ Codex hooks 已写入 {hooks_file}")
+
+    # 写入规则文件
+    scripts_root = get_scripts_root()
+    python_cmd = get_python_cmd()
+    rule_file = codex_dir / "logrelay-rule.md"
+    rule_file.write_text(
+        RULE_CONTENT.format(python_cmd=python_cmd, scripts_root=scripts_root),
+        encoding="utf-8",
+    )
+    print(f"  ✓ Codex rules 已写入 {rule_file}")
     print("  ⚠ 请确保 .codex/config.toml 中 [features] codex_hooks = true")
 
 
@@ -116,3 +159,9 @@ def uninstall(vault_root: Path) -> None:
 
     hooks_file.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"  ✓ Codex hooks 已从 {hooks_file} 移除")
+
+    # 移除规则文件
+    rule_file = vault_root / ".codex" / "logrelay-rule.md"
+    if rule_file.exists():
+        rule_file.unlink()
+        print(f"  ✓ Codex rules 已移除")
