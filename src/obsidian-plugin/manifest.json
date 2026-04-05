@@ -1,0 +1,9 @@
+{
+  "id": "logrelay",
+  "name": "LogRelay",
+  "version": "0.1.0",
+  "minAppVersion": "1.0.0",
+  "description": "跨工具工作日志接力系统 - 接力链路可视化、跨项目搜索、统计面板",
+  "author": "LogRelay",
+  "isDesktopOnly": false
+}

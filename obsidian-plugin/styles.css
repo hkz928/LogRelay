@@ -1,0 +1,291 @@
+/* LogRelay Plugin Styles */
+
+/* ===== Common ===== */
+.logrelay-header h3 {
+	margin: 0 0 12px 0;
+	font-size: 16px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	padding-bottom: 8px;
+}
+
+.logrelay-empty {
+	color: var(--text-muted);
+	text-align: center;
+	padding: 20px;
+}
+
+/* ===== Relay View ===== */
+.logrelay-relay-view {
+	padding: 12px;
+}
+
+.logrelay-project-selector {
+	margin-bottom: 16px;
+}
+
+.logrelay-project-selector select {
+	width: 100%;
+	padding: 6px 8px;
+}
+
+.logrelay-chain-project {
+	margin-bottom: 12px;
+	padding: 8px;
+	background: var(--background-secondary);
+	border-radius: 4px;
+}
+
+.logrelay-chain-nodes {
+	padding-left: 8px;
+}
+
+.logrelay-node {
+	display: flex;
+	align-items: flex-start;
+	padding: 8px 10px;
+	margin: 4px 0;
+	border-radius: 4px;
+	cursor: pointer;
+	border-left: 3px solid transparent;
+	transition: background 0.15s;
+}
+
+.logrelay-node:hover {
+	background: var(--background-secondary);
+}
+
+.logrelay-node-completed { border-left-color: #4caf50; }
+.logrelay-node-active { border-left-color: #2196f3; }
+.logrelay-node-paused { border-left-color: #ff9800; }
+.logrelay-node-failed { border-left-color: #f44336; }
+
+.logrelay-node-icon {
+	font-size: 14px;
+	margin-right: 8px;
+	flex-shrink: 0;
+}
+
+.logrelay-node-info {
+	display: flex;
+	gap: 4px;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.logrelay-node-tool {
+	font-weight: 600;
+}
+
+.logrelay-node-date {
+	color: var(--text-faint);
+}
+
+.logrelay-node-subject {
+	font-size: 13px;
+	margin-top: 2px;
+	color: var(--text-normal);
+}
+
+.logrelay-connector {
+	text-align: center;
+	color: var(--text-faint);
+	font-size: 12px;
+	padding: 2px 0;
+}
+
+/* ===== Search View ===== */
+.logrelay-search-view {
+	padding: 12px;
+}
+
+.logrelay-search-bar {
+	margin-bottom: 8px;
+}
+
+.logrelay-search-input {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 14px;
+}
+
+.logrelay-search-input:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+.logrelay-filter-bar {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+}
+
+.logrelay-filter {
+	padding: 4px 6px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 3px;
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	font-size: 12px;
+}
+
+.logrelay-result-count {
+	font-size: 12px;
+	color: var(--text-muted);
+	margin-bottom: 8px;
+}
+
+.logrelay-result-card {
+	padding: 10px;
+	margin-bottom: 6px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: 1px solid var(--background-modifier-border);
+	transition: background 0.15s;
+}
+
+.logrelay-result-card:hover {
+	background: var(--background-secondary);
+}
+
+.logrelay-result-title {
+	font-size: 14px;
+	font-weight: 500;
+	margin-bottom: 4px;
+}
+
+.logrelay-result-meta {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.logrelay-result-tags {
+	margin-top: 4px;
+}
+
+.logrelay-tag {
+	display: inline-block;
+	font-size: 11px;
+	padding: 1px 6px;
+	margin-right: 4px;
+	border-radius: 3px;
+	background: var(--background-secondary);
+	color: var(--text-muted);
+}
+
+/* ===== Stats View ===== */
+.logrelay-stats-view {
+	padding: 12px;
+}
+
+.logrelay-stats-section {
+	margin-bottom: 20px;
+}
+
+.logrelay-stats-section h4 {
+	font-size: 14px;
+	margin: 0 0 8px 0;
+	color: var(--text-normal);
+}
+
+/* Bar chart */
+.logrelay-stats-bar-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 4px;
+	gap: 8px;
+}
+
+.logrelay-stats-bar-label {
+	width: 100px;
+	font-size: 12px;
+	text-align: right;
+	flex-shrink: 0;
+}
+
+.logrelay-stats-bar-container {
+	flex: 1;
+	height: 18px;
+	background: var(--background-secondary);
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.logrelay-stats-bar {
+	height: 100%;
+	background: var(--interactive-accent);
+	border-radius: 3px;
+	transition: width 0.3s;
+}
+
+.logrelay-stats-bar-pct {
+	width: 40px;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+/* Task progress */
+.logrelay-task-summary {
+	display: flex;
+	gap: 16px;
+	font-size: 13px;
+	margin-bottom: 8px;
+}
+
+.logrelay-progress-bar {
+	height: 8px;
+	background: var(--background-secondary);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.logrelay-progress-fill {
+	height: 100%;
+	background: #4caf50;
+	border-radius: 4px;
+	transition: width 0.3s;
+}
+
+/* Heatmap */
+.logrelay-heatmap {
+	display: flex;
+	gap: 2px;
+	flex-wrap: wrap;
+}
+
+.logrelay-heatmap-cell {
+	width: 14px;
+	height: 14px;
+	border-radius: 2px;
+	background: var(--background-secondary);
+}
+
+.logrelay-heat-1 { background: #9be9a8; }
+.logrelay-heat-2 { background: #40c463; }
+.logrelay-heat-3 { background: #30a14e; }
+.logrelay-heat-4 { background: #216e39; }
+
+/* Dark mode heatmap adjustments */
+.theme-dark .logrelay-heat-1 { background: #0e4429; }
+.theme-dark .logrelay-heat-2 { background: #006d32; }
+.theme-dark .logrelay-heat-3 { background: #26a641; }
+.theme-dark .logrelay-heat-4 { background: #39d353; }
+
+/* Top projects list */
+.logrelay-top-projects {
+	padding-left: 20px;
+	font-size: 13px;
+}
+
+.logrelay-top-projects li {
+	margin-bottom: 4px;
+}
+
+.logrelay-stats-count {
+	color: var(--text-muted);
+	font-size: 12px;
+}
