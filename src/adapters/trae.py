@@ -11,90 +11,100 @@ from ..core.config import get_python_cmd, get_scripts_root
 
 RULE_CONTENT = """---
 name: logrelay
-description: Cross-tool session logging relay. Saves session log to logs/trae/ and updates logs/STATUS.md when user says "save log" or "end log".
+description: 跨工具工作日志接力系统。会话结束时用户说"保存日志"触发日志保存到 logs/ 目录并更新 STATUS.md。Trae 国际版和 Trae CN 版通用。
 ---
 
-# LogRelay Session Logging
+# LogRelay 工作日志接力
 
-When the user says "save log" / "end log" / "保存日志" / "结束日志" / "记录会话", execute the following save flow.
+当用户说 "结束日志" / "保存日志" / "end log" / "save log" / "记录会话" / "记录一下" 时，执行以下保存流程。
 
-## Save Flow
+## 第一步：确定工具名和目录名
 
-### Step 1: Determine project and paths
+**自动检测**：判断当前是 Trae 国际版还是 Trae CN 版：
+- 如果用户使用中文交流，或工作目录包含中文路径 → 工具名为 `trae-cn`，日志目录为 `logs/trae-cn/`
+- 否则 → 工具名为 `trae`，日志目录为 `logs/trae/`
 
-Current working directory is the "project directory". Log path rules:
-- Log file: `<project_dir>/logs/trae/<filename>.md`
-- Status file: `<project_dir>/logs/STATUS.md`
+如果无法确定，默认使用 `trae-cn` 和 `logs/trae-cn/`。
 
-Example: if CWD is `/Users/xxx/vault/project/myapp/`:
-- Log → `/Users/xxx/vault/project/myapp/logs/trae/2026-04-06_143025-API-design.md`
-- STATUS.md → `/Users/xxx/vault/project/myapp/logs/STATUS.md`
+## 第二步：确定项目和路径
 
-### Step 2: Generate SESSION_ID
+当前工作目录即为"项目目录"。日志存放路径规则：
+- 日志文件：`<项目目录>/<日志目录>/<文件名>.md`
+- 状态文件：`<项目目录>/logs/STATUS.md`
 
-Format: `YYYY-MM-DD_HHMMSS` (e.g. `2026-04-06_143025`). Generate from current time.
+例如当前工作目录是 `/Users/xxx/vault/project/五厂/`：
+- 日志存到 `/Users/xxx/vault/project/五厂/logs/trae-cn/2026-04-06_143025-演讲词优化.md`
+- STATUS.md 在 `/Users/xxx/vault/project/五厂/logs/STATUS.md`
 
-### Step 3: Run save command
+如果项目目录是 vault 根目录（如 `/Users/xxx/vault/`）：
+- 日志存到 `/Users/xxx/vault/logs/trae-cn/2026-04-06_143025-演讲词优化.md`
+- STATUS.md 在 `/Users/xxx/vault/logs/STATUS.md`
+
+## 第三步：生成 SESSION_ID
+
+格式为 `YYYY-MM-DD_HHMMSS`（如 `2026-04-06_143025`），用当前时间生成。
+
+## 第四步：运行保存命令
 
 ```bash
-mkdir -p <project_dir>/logs/trae && python3 "{scripts_root}/src/hooks/session_end.py" --tool trae --session-id <SESSION_ID> --data '<JSON>'
+mkdir -p <项目目录>/logs/<日志目录> && python3 "{scripts_root}/src/hooks/session_end.py" --tool <工具名> --session-id <SESSION_ID> --data '<JSON数据>'
 ```
 
-JSON format:
+其中 JSON 数据格式：
 ```json
 {{
-  "summary": "One-sentence summary (max 200 chars)",
-  "tasks": [{{"text": "Task", "completed": true/false}}],
-  "decisions": ["Key decision"],
-  "artifacts": ["File paths"],
-  "related_files": ["Related paths"],
+  "summary": "一段话总结本次会话（不超过200字）",
+  "tasks": [{{"text": "任务描述", "completed": true/false}}],
+  "decisions": ["关键决策1"],
+  "artifacts": ["创建或修改的文件路径"],
+  "related_files": ["相关文件路径"],
   "handoff_to": null,
-  "conversation": "Full conversation timeline"
+  "conversation": "完整对话记录（按时间线整理）"
 }}
 ```
 
-### Step 4: If command fails, write log manually
+## 第五步：如果命令失败，手动写入日志
 
-Create file at `<project_dir>/logs/trae/<SESSION_ID>-<keyword>.md`:
+用文件写入工具直接创建日志文件 `<项目目录>/logs/<日志目录>/<SESSION_ID>-<关键词>.md`，内容格式：
 
 ```
 ---
-tool: "trae"
+tool: "<工具名>"
 session_id: "<SESSION_ID>"
-project: "<project name>"
-started: "<start time>"
-ended: "<current time>"
+project: "<项目名>"
+started: "<开始时间>"
+ended: "<当前时间>"
 status: completed
 tags: []
 ---
 
-## Summary
-<one-sentence summary>
+## 摘要
+<一段话总结>
 
-## Task List
-- [x] Completed task
-- [ ] Pending task
+## 任务清单
+- [x] 已完成任务
+- [ ] 未完成任务
 
-## Key Decisions
-- Decision and reason
+## 关键决策
+- 决策及原因
 
-## Artifacts
-- File path
+## 产出物
+- 文件路径
 
-## Context Relay
-- Related files: paths
+## 上下文传递
+- 相关文件: 路径
 
 %%
 
-## Full Conversation Record
+## 完整对话记录
 
-### [HH:MM] User: What user said
-### [HH:MM] Assistant: Key operations (files read, code changed, commands run)
+### [HH:MM] User: 用户说了什么
+### [HH:MM] Assistant: 做了什么关键操作（读了什么、改了什么、运行了什么）
 ```
 
-Also create or update `<project_dir>/logs/STATUS.md`.
+同时更新或创建 `<项目目录>/logs/STATUS.md`。
 
-**IMPORTANT: Log files MUST go to `logs/trae/` directory, NOT anywhere else in the project. STATUS.md MUST be in `logs/` directory.**
+**重要：日志文件必须写到 `logs/<日志目录>/` 下，STATUS.md 必须在 `logs/` 目录下。绝对不能写到项目其他位置。**
 """
 
 
