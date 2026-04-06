@@ -15,7 +15,7 @@ Seamless session continuity across AI coding tools. Design APIs in Trae, continu
 | Tool | Mode | Auto-trigger | Config Location |
 |------|------|-------------|-----------------|
 | **Claude Code** | Fully automatic | SessionStart hook + CLAUDE.md rules | `.claude/settings.json` |
-| **Trae / Trae CN** | Fully automatic | SessionStart hook | `.trae/skills/logrelay/` |
+| **Trae / Trae CN** | Fully automatic | SessionStart hook + SKILL.md rules | `.trae/skills/logrelay/` |
 | **Codex** | Fully automatic | SessionStart hook | `.codex/hooks.json` |
 | **Cursor** | Semi-automatic | `/start-log` `/end-log` commands | `.cursor/commands/` |
 | **Qoder** | Semi-automatic | `/start-log` `/end-log` commands | `.qoder/commands/` |
@@ -184,6 +184,9 @@ python3 install.py --uninstall  # Remove everything
 - Codex: ensure `~/.codex/config.toml` has `[features] codex_hooks = true`
 - Trae: check `.trae/skills/logrelay/hooks.json` exists
 
+**Q: Trae CN saves log to wrong directory (logs/trae/ instead of logs/trae-cn/)?**
+Re-run `python3 install.py --tools trae` to regenerate SKILL.md. The latest version auto-detects the tool variant.
+
 **Q: Not working after switching Windows/macOS?**
 Re-run `install.py` — it regenerates platform-specific configs.
 
@@ -207,7 +210,7 @@ Re-run `install.py` — it regenerates platform-specific configs.
 | 工具 | 模式 | 自动触发 | 配置位置 |
 |------|------|----------|----------|
 | **Claude Code** | 全自动 | SessionStart hook + CLAUDE.md 规则 | `.claude/settings.json` |
-| **Trae / Trae CN** | 全自动 | SessionStart hook | `.trae/skills/logrelay/` |
+| **Trae / Trae CN** | 全自动 | SessionStart hook + SKILL.md 规则 | `.trae/skills/logrelay/` |
 | **Codex** | 全自动 | SessionStart hook | `.codex/hooks.json` |
 | **Cursor** | 半自动 | `/start-log` `/end-log` 命令 | `.cursor/commands/` |
 | **Qoder** | 半自动 | `/start-log` `/end-log` 命令 | `.qoder/commands/` |
@@ -370,6 +373,9 @@ python3 install.py --uninstall  # 卸载全部
 | 跨平台 | `install.py` 自动检测平台 |
 
 ### 常见问题
+
+**Q: Trae CN 日志保存到错误目录（logs/trae/ 而非 logs/trae-cn/）？**
+重新运行 `python3 install.py --tools trae` 生成最新 SKILL.md，新版会自动检测工具版本。
 
 **Q: 安装后 hooks 没有触发？**
 - Claude Code：检查 `.claude/settings.json` 中是否有 LogRelay 的 hooks
